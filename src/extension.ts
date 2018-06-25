@@ -1,29 +1,82 @@
-'use strict';
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
+import {
+  workspace,
+  TextDocument,
+  languages,
+  DiagnosticSeverity,
+  Range,
+  Diagnostic,
+  ExtensionContext,
+  TextDocumentChangeEvent
+} from "vscode";
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+import { JCLinter } from "./linter";
 
-    // Use the console to output diagnostic information (console.log) and errors (console.error)
-    // This line of code will only be executed once when your extension is activated
-    console.log('Congratulations, your extension "vscode-jcl" is now active!');
+let diagnosticCollection = languages.createDiagnosticCollection("JCL");
 
-    // The command has been defined in the package.json file
-    // Now provide the implementation of the command with  registerCommand
-    // The commandId parameter must match the command field in package.json
-    let disposable = vscode.commands.registerCommand('extension.sayHello', () => {
-        // The code you place here will be executed every time your command is executed
+export function activate(context: ExtensionContext) {
+  console.log('Congratulations, your extension "vscode-jcl" is now active!');
 
-        // Display a message box to the user
-        vscode.window.showInformationMessage('Hello World!');
-    });
+  let jclinter: JCLinter;
+  context.subscriptions.push(diagnosticCollection);
 
-    context.subscriptions.push(disposable);
+  workspace.onDidOpenTextDocument((document: TextDocument) => {
+    if (document.languageId === "JCL" && document.uri.scheme === "file") {
+      jclinter = new JCLinter(document.fileName);
+      jclinter.setText(document.getText());
+      processDiagnostic(document, jclinter);
+    }
+  });
+
+  workspace.onDidCloseTextDocument((document: TextDocument) => {
+    if (document.languageId === "JCL" && document.uri.scheme === "file") {
+      diagnosticCollection.set(document.uri, []);
+    }
+  });
+
+  let timer: any;
+  workspace.onDidChangeTextDocument((event: TextDocumentChangeEvent) => {
+    if (
+      event.contentChanges.length > 0 &&
+      event.document.languageId === "JCL" &&
+      event.document.uri.scheme === "file"
+    ) {
+      if (!jclinter) {
+        jclinter = new JCLinter(event.document.fileName);
+      }
+      if (timer) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(() => {
+        timer = null;
+        jclinter.setText(event.document.getText());
+        processDiagnostic(event.document, jclinter);
+      }, 300);
+    }
+  });
+}
+
+function processDiagnostic(document: TextDocument, jclinter: JCLinter) {
+  let diagnostics = [];
+  jclinter.parse();
+  let entries = jclinter.diagnostics;
+  for (let entry of entries) {
+    let startRow = entry.range.start.row === 0 ? 0 : entry.range.start.row - 1;
+    let endRow = entry.range.end.row === 0 ? 0 : entry.range.end.row - 1;
+    let range = new Range(
+      startRow,
+      entry.range.start.column,
+      endRow,
+      entry.range.end.column
+    );
+    let diagnostic = new Diagnostic(
+      range,
+      entry.message,
+      DiagnosticSeverity.Error
+    );
+    diagnostics.push(diagnostic);
+  }
+  diagnosticCollection.set(document.uri, diagnostics);
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {
-}
+export function deactivate() {}
