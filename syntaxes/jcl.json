@@ -1,0 +1,53 @@
+{
+  "name": "jcl",
+  "scopeName": "source.jcl",
+  "fileTypes": [
+    "jcl"
+  ],
+  "patterns": [{
+      "name": "comment.line.jcl",
+      "match": "^//\\*.*$"
+    },
+    {
+      "name": "comment.line.jcl",
+      "match": "^/\\*.*$"
+    },
+    {
+      "begin": "(^//)([A-Z0-9\\$\\#@]+)*\\s*(COMMAND|DD|EXEC|JOB|PEND|PROC)*\\s*",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.jcl"
+        },
+        "2": {
+          "name": "variable.other.jcl"
+        },
+        "3": {
+          "name": "keyword.other.jcl"
+        }
+      },
+      "end": "$",
+      "name": "meta.statement.jcl",
+      "patterns": [{
+          "match": "[A-Z&\\.\\*]+[0-9]*",
+          "name": "variable.other.jcl"
+        },
+        {
+          "match": "\\B,",
+          "name": "punctuation.separator.comma.jcl"
+        },
+        {
+          "match": "\\s+[^\\n\\r\\f]*",
+          "name": "comment.line.jcl"
+        },
+        {
+          "match": "'.*'",
+          "name": "string.quoted.single.jcl"
+        },
+        {
+          "match": "\\d+",
+          "name": "constant.numeric.jcl"
+        }
+      ]
+    }
+  ]
+}
