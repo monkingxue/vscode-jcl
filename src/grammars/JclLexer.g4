@@ -69,14 +69,16 @@ BLANK: Hws+ -> skip;
 // ------ Comment Begin ------
 mode COMMENT_MODE;
 
-COMMENT: ~[\r\n\f]+ -> skip, popMode;
+COMMENT: UnVws+ -> skip;
+
+COMMENT_NL: Vws -> skip, popMode;
 
 // ------- Comment End  ------
 
 // ------ Delimiter Begin ------
 mode DELIMITER_MODE;
 
-DELIMITER_COMMENT: ~[\r\n\f]+ -> skip;
+DELIMITER_COMMENT: UnVws+ -> skip;
 
 DELIMITER_NL: Vws -> skip, mode(DEFAULT_MODE);
 
