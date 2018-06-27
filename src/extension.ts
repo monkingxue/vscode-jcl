@@ -1,12 +1,14 @@
 import {
   workspace,
+  commands,
   TextDocument,
   languages,
   DiagnosticSeverity,
   Range,
   Diagnostic,
   ExtensionContext,
-  TextDocumentChangeEvent
+  TextDocumentChangeEvent,
+  window
 } from "vscode";
 
 import { JCLinter } from "./linter";
@@ -17,12 +19,14 @@ export function activate(context: ExtensionContext) {
   console.log('Congratulations, your extension "vscode-jcl" is now active!');
 
   let jclinter: JCLinter;
-  context.subscriptions.push(diagnosticCollection);
+  let code: string;
+  let output = window.createOutputChannel("JCL Result");
 
   workspace.onDidOpenTextDocument((document: TextDocument) => {
     if (document.languageId === "JCL" && document.uri.scheme === "file") {
       jclinter = new JCLinter(document.fileName);
-      jclinter.setText(document.getText());
+      code = document.getText();
+      jclinter.setText(code);
       processDiagnostic(document, jclinter);
     }
   });
@@ -48,11 +52,26 @@ export function activate(context: ExtensionContext) {
       }
       timer = setTimeout(() => {
         timer = null;
-        jclinter.setText(event.document.getText());
+        code = event.document.getText();
+        jclinter.setText(code);
         processDiagnostic(event.document, jclinter);
       }, 300);
     }
   });
+
+  let disposable = commands.registerCommand("extension.run", () => {
+    const result = runJCL(code);
+    output.append(result);
+    output.show();
+  });
+
+  context.subscriptions.push(output);
+  context.subscriptions.push(disposable);
+  context.subscriptions.push(diagnosticCollection);
+}
+
+function runJCL(code: string): string {
+  return code;
 }
 
 function processDiagnostic(document: TextDocument, jclinter: JCLinter) {
