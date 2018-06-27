@@ -1,8 +1,12 @@
-import { Token } from "antlr4ts";
+import { Token, CommonToken } from "antlr4ts";
 
 import { DiagnosticEntry } from "./index";
 import { genDiagnostic, parseParams, Param, ParamType } from "./util";
-import { NormalContext, StatementContext } from "../grammars/JclParser";
+import {
+  NormalContext,
+  StatementContext,
+  ProgContext
+} from "../grammars/JclParser";
 import { JclParserListener } from "../grammars/JclParserListener";
 import { checkParams } from "./paramChecker";
 
@@ -10,7 +14,9 @@ export class SemanticListener implements JclParserListener {
   constructor(private diagnostics: DiagnosticEntry[]) {}
   private symbolMap: Map<string, Token> = new Map();
   private hasJobOp: boolean = false;
-  private currentOp: string;
+  private currentOp: string = "";
+
+  public exitProg(ctx: ProgContext) {}
 
   public exitStatement(ctx: StatementContext) {
     const fieldId = ctx.FIELD_STATEMENT().payload;
@@ -36,7 +42,7 @@ export class SemanticListener implements JclParserListener {
     this.currentOp = op;
     if (op === "JOB") {
       this.onlyOneJob(opToken);
-    } else if(op === "EXEC") {
+    } else if (op === "EXEC") {
       this.symbolMap.clear();
     }
   }

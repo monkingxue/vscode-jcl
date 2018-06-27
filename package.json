@@ -66,6 +66,7 @@
   },
   "dependencies": {
     "antlr4ts": "^0.4.1-alpha.0",
+    "axios": "^0.18.0",
     "jcl-g4": "file:../jcl-g4"
   }
 }

@@ -12,6 +12,7 @@ import {
 } from "vscode";
 
 import { JCLinter } from "./linter";
+import { runJCL } from "./request";
 
 let diagnosticCollection = languages.createDiagnosticCollection("JCL");
 
@@ -60,9 +61,11 @@ export function activate(context: ExtensionContext) {
   });
 
   let disposable = commands.registerCommand("extension.run", () => {
-    const result = runJCL(code);
-    output.append(result);
-    output.show();
+    console.log(code);
+    runJCL(code).then(result => {
+      output.append(result);
+      output.show();
+    });
   });
 
   context.subscriptions.push(output);
@@ -70,9 +73,9 @@ export function activate(context: ExtensionContext) {
   context.subscriptions.push(diagnosticCollection);
 }
 
-function runJCL(code: string): string {
-  return code;
-}
+// function runJCL(code: string): string {
+//   return code;
+// }
 
 function processDiagnostic(document: TextDocument, jclinter: JCLinter) {
   let diagnostics = [];
