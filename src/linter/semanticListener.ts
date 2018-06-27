@@ -36,6 +36,8 @@ export class SemanticListener implements JclParserListener {
     this.currentOp = op;
     if (op === "JOB") {
       this.onlyOneJob(opToken);
+    } else if(op === "EXEC") {
+      this.symbolMap.clear();
     }
   }
 
