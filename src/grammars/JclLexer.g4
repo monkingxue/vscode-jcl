@@ -47,7 +47,7 @@ fragment NameStartChar: [A-Z] | Wildcard;
 
 fragment NameChar: NameStartChar | Digit;
 
-fragment StringLiteral: SQuote PAscii* SQuote;
+fragment StringLiteral: SQuote PAscii*? SQuote;
 
 // TODO 
 fragment CharSet: NameChar | '-' | '*' | '&';

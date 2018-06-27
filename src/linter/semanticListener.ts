@@ -1,9 +1,10 @@
-import { Token, RuleContextWithAltNum } from "antlr4ts";
+import { Token } from "antlr4ts";
 
 import { DiagnosticEntry } from "./index";
 import { genDiagnostic, parseParams, Param, ParamType } from "./util";
 import { NormalContext, StatementContext } from "../grammars/JclParser";
 import { JclParserListener } from "../grammars/JclParserListener";
+import { checkParams } from "./paramChecker";
 
 export class SemanticListener implements JclParserListener {
   constructor(private diagnostics: DiagnosticEntry[]) {}
@@ -19,6 +20,7 @@ export class SemanticListener implements JclParserListener {
     if (context) {
       const params = parseParams(context);
       this.paramsOrder(params);
+      this.mismatchParams(this.currentOp, params);
     }
   }
 
@@ -106,5 +108,11 @@ export class SemanticListener implements JclParserListener {
       );
       return this.diagnostics.push(entry);
     }
+  }
+
+  private mismatchParams(op: string, params: Param[]) {
+    checkParams(op, params)
+      .map(({ message, token }) => genDiagnostic(message, token))
+      .forEach(item => this.diagnostics.push(item));
   }
 }

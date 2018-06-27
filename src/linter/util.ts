@@ -1,6 +1,6 @@
-import { Token, CommonTokenFactory, CommonToken } from "antlr4ts";
+import { Token, CommonToken } from "antlr4ts";
 import { DiagnosticEntry } from ".";
-import { ParamsContext, PosValueContext } from "../grammars/JclParser";
+import { ParamsContext } from "../grammars/JclParser";
 import { JclLexer } from "../grammars/JclLexer";
 
 export enum ParamType {
@@ -16,7 +16,7 @@ export interface Param {
   token: Token;
 }
 
-class PosParam {
+export class PosParam {
   constructor(public data: rhsValue) {}
   public static new(data: rhsValue, token: Token): Param {
     return {
@@ -27,7 +27,7 @@ class PosParam {
   }
 }
 
-class KwParam {
+export class KwParam {
   constructor(public key: string, public value: rhsValue) {}
   public static new(key: string, value: rhsValue, token: Token): Param {
     return {
@@ -78,22 +78,16 @@ export function parseParams(params: ParamsContext): Param[] {
         );
       }
     } else if (kwContext) {
-      const key = kwContext.VARIA_VALUE().text;
+      const keyNode = kwContext.VARIA_VALUE();
+      const keyText = keyNode.text;
       const kwValue = kwContext.kwValue();
       if (kwValue) {
         const [rhsValue, record] = [kwValue.rhsValue(), kwValue.record()];
-        let node: Token;
         if (rhsValue) {
-          const posValue = rhsValue.posValue();
-          if (posValue) {
-            node = posValue.children[0].payload;
-          } else {
-            node = rhsValue.children[0].payload;
-          }
-          tempParam = KwParam.new(key, rhsValue.text, node);
+          tempParam = KwParam.new(keyText, rhsValue.text, keyNode.payload);
         } else if (record) {
           tempParam = KwParam.new(
-            key,
+            keyText,
             parseParams(record.params()),
             record.PARAM_LPAREN().payload
           );
@@ -103,7 +97,7 @@ export function parseParams(params: ParamsContext): Param[] {
         const pos = kwContext.PARAM_EQ().payload.stopIndex;
         const source = kwContext.PARAM_EQ().payload.tokenSource;
         tempParam = KwParam.new(
-          key,
+          keyText,
           text,
           new CommonToken(JclLexer.BLANK, text, { source }, null, pos, pos)
         );
