@@ -69,16 +69,14 @@ BLANK: Hws+ -> skip;
 // ------ Comment Begin ------
 mode COMMENT_MODE;
 
-COMMENT: UnVws+ -> skip;
-
-COMMENT_NL: Vws -> skip, popMode;
+COMMENT: UnVws* -> skip, popMode;
 
 // ------- Comment End  ------
 
 // ------ Delimiter Begin ------
 mode DELIMITER_MODE;
 
-DELIMITER_COMMENT: UnVws+ -> skip;
+DELIMITER_COMMENT: UnVws* -> skip;
 
 DELIMITER_NL: Vws -> skip, mode(DEFAULT_MODE);
 
