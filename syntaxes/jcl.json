@@ -44,7 +44,7 @@
           "name": "string.quoted.single.jcl"
         },
         {
-          "match": "\\d+",
+          "match": "\\d+[KMkm]?",
           "name": "constant.numeric.jcl"
         }
       ]

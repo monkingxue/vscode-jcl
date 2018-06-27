@@ -122,7 +122,7 @@ STAR_VALUE: Star;
 
 LITERAL_VALUE: StringLiteral;
 
-NUMBERAL_VALUE: Numeral;
+NUMBERAL_VALUE: Numeral [KMkm]?;
 
 DOT_VALUE:
 	(VARIA_VALUE Dot)+ (

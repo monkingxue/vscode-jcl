@@ -23,7 +23,10 @@ const DDSPEC = [
   "SPACE",
   "DISP",
   "DCB",
-  "SYSOUT"
+  "SYSOUT",
+  "LRECL",
+  "RECFM",
+  "DATACLAS"
 ];
 
 function specMatch(spec: string[], params: Param[]) {
